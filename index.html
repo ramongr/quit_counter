@@ -82,6 +82,7 @@
     <h1>Time elapsed since Lúcia should've quit her job</h1>
 
     <div class="counter" aria-live="polite">
+      <div class="unit"><div class="value" id="years">0</div><div class="label">Years</div></div>
       <div class="unit"><div class="value" id="months">0</div><div class="label">Months</div></div>
       <div class="unit"><div class="value" id="days">0</div><div class="label">Days</div></div>
       <div class="unit"><div class="value" id="hours">0</div><div class="label">Hours</div></div>
@@ -95,6 +96,7 @@
   <script>
     const startDate = new Date("2024-10-11T00:00:00");
 
+    const yearsEl = document.getElementById("years");
     const monthsEl = document.getElementById("months");
     const daysEl = document.getElementById("days");
     const hoursEl = document.getElementById("hours");
@@ -124,6 +126,10 @@
         anchor.setMonth(anchor.getMonth() + months);
       }
 
+      // Split total months into years + remaining months.
+      const years = Math.floor(months / 12);
+      const remMonths = months - years * 12;
+
       let diff = Math.max(0, now - anchor);
 
       const days = Math.floor(diff / 86400000);
@@ -134,7 +140,8 @@
       diff -= minutes * 60000;
       const seconds = Math.floor(diff / 1000);
 
-      monthsEl.textContent = months.toLocaleString();
+      yearsEl.textContent = years.toLocaleString();
+      monthsEl.textContent = remMonths.toLocaleString();
       daysEl.textContent = days.toLocaleString();
       hoursEl.textContent = pad(hours);
       minutesEl.textContent = pad(minutes);
