@@ -75,6 +75,106 @@
       font-size: 0.9rem;
       opacity: 0.6;
     }
+
+    /* ---------- Nyan Cat ---------- */
+    .nyan {
+      position: fixed;
+      top: 24px;
+      left: 0;
+      width: 120px;
+      height: 70px;
+      transform: translateX(-140%);
+      pointer-events: none;
+      z-index: 9999;
+      animation: nyan-fly 20s linear infinite;
+      image-rendering: pixelated;
+    }
+
+    .nyan .rainbow {
+      position: absolute;
+      top: 50%;
+      right: 82%;
+      transform: translateY(-50%);
+      width: 100vw;
+      height: 40px;
+      background:
+        linear-gradient(
+          to bottom,
+          #ff0f0f 0 14.28%,
+          #ff9a00 14.28% 28.57%,
+          #ffee00 28.57% 42.85%,
+          #33cc33 42.85% 57.14%,
+          #3399ff 57.14% 71.42%,
+          #9933ff 71.42% 100%
+        );
+      /* Wavy mask: smoother, elongated waves (wavelength ~50px, amplitude ±5px)
+         that lag behind the cat so the trail feels dragged along. */
+      -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 40' preserveAspectRatio='none'><path fill='white' d='M0,10 Q12.5,5 25,10 T50,10 L50,30 Q37.5,35 25,30 T0,30 Z'/></svg>") repeat-x;
+              mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 40' preserveAspectRatio='none'><path fill='white' d='M0,10 Q12.5,5 25,10 T50,10 L50,30 Q37.5,35 25,30 T0,30 Z'/></svg>") repeat-x;
+      -webkit-mask-size: 50px 40px;
+              mask-size: 50px 40px;
+      animation: rainbow-wave 1.4s linear infinite;
+    }
+
+    .nyan .cat {
+      position: absolute;
+      inset: 0;
+      animation: cat-bounce 0.3s steps(2) infinite;
+    }
+
+    .nyan .rainbow-text {
+      position: absolute;
+      top: 50%;
+      right: 82%;
+      transform: translateY(-50%);
+      width: 100vw;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      overflow: hidden;
+      white-space: nowrap;
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         0    0   3px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
+    }
+
+    @keyframes nyan-fly {
+      /* Top pass */
+      0%   { top: 24px;               left: 0;    transform: translateX(-140%); }
+      45%  { top: 24px;               left: 100%; transform: translateX(0%); }
+      /* Hold off-screen right, then teleport to off-screen left at the bottom */
+      50%  { top: 24px;               left: 100%; transform: translateX(0%); }
+      50.01% { top: calc(100vh - 94px); left: 0;  transform: translateX(-140%); }
+      /* Bottom pass */
+      95%  { top: calc(100vh - 94px); left: 100%; transform: translateX(0%); }
+      /* Hold off-screen right before restarting at the top */
+      100% { top: calc(100vh - 94px); left: 100%; transform: translateX(0%); }
+    }
+
+    @keyframes cat-bounce {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(3px); }
+    }
+
+    @keyframes rainbow-wave {
+      from { -webkit-mask-position: 0    0; mask-position: 0    0; }
+      to   { -webkit-mask-position: -50px 0; mask-position: -50px 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .nyan { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -92,6 +192,48 @@
 
     <p class="since">Counting since October 11, 2024</p>
   </main>
+
+  <!-- Nyan Cat flying across the top, then the bottom, on repeat -->
+  <div class="nyan" aria-hidden="true">
+    <div class="rainbow"></div>
+    <div class="rainbow-text">just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit&nbsp;&nbsp;·&nbsp;&nbsp;just&nbsp;quit</div>
+    <svg class="cat" viewBox="0 0 24 14" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+      <!-- Pop-Tart body -->
+      <rect x="4"  y="3"  width="14" height="8" fill="#ffb6c1"/>
+      <rect x="4"  y="3"  width="14" height="1" fill="#e88ea0"/>
+      <rect x="4"  y="10" width="14" height="1" fill="#e88ea0"/>
+      <rect x="4"  y="3"  width="1"  height="8" fill="#e88ea0"/>
+      <rect x="17" y="3"  width="1"  height="8" fill="#e88ea0"/>
+      <!-- sprinkles -->
+      <rect x="6"  y="5"  width="1" height="1" fill="#ff3b8a"/>
+      <rect x="9"  y="7"  width="1" height="1" fill="#ffee00"/>
+      <rect x="12" y="4"  width="1" height="1" fill="#33ccff"/>
+      <rect x="14" y="8"  width="1" height="1" fill="#ffffff"/>
+      <rect x="8"  y="9"  width="1" height="1" fill="#ff3b8a"/>
+      <rect x="15" y="5"  width="1" height="1" fill="#33ccff"/>
+      <!-- Cat head -->
+      <rect x="17" y="3"  width="4" height="6" fill="#c0c0c0"/>
+      <rect x="17" y="3"  width="1" height="1" fill="#a0a0a0"/>
+      <rect x="20" y="3"  width="1" height="1" fill="#a0a0a0"/>
+      <!-- ears -->
+      <rect x="17" y="2"  width="1" height="1" fill="#c0c0c0"/>
+      <rect x="20" y="2"  width="1" height="1" fill="#c0c0c0"/>
+      <!-- eyes -->
+      <rect x="18" y="5"  width="1" height="1" fill="#000"/>
+      <rect x="20" y="5"  width="1" height="1" fill="#000"/>
+      <!-- cheeks -->
+      <rect x="18" y="7"  width="1" height="1" fill="#ff8fa8"/>
+      <rect x="20" y="7"  width="1" height="1" fill="#ff8fa8"/>
+      <!-- mouth -->
+      <rect x="19" y="7"  width="1" height="1" fill="#000"/>
+      <!-- tail -->
+      <rect x="3"  y="6"  width="1" height="2" fill="#c0c0c0"/>
+      <rect x="2"  y="5"  width="1" height="2" fill="#c0c0c0"/>
+      <!-- legs -->
+      <rect x="6"  y="11" width="2" height="2" fill="#c0c0c0"/>
+      <rect x="14" y="11" width="2" height="2" fill="#c0c0c0"/>
+    </svg>
+  </div>
 
   <script>
     const startDate = new Date("2024-10-11T00:00:00");
