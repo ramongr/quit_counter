@@ -227,6 +227,34 @@
       outline-offset: 2px;
     }
 
+    /* Slight misalignment for the first question's buttons — a subtle
+       "off by a hair" nudge that hints something's not quite right. */
+    .dialog-buttons.misaligned .dialog-btn.yes {
+      transform: translateY(-0.75px) rotate(-0.3deg);
+    }
+
+    .dialog-buttons.misaligned .dialog-btn.yes:hover {
+      transform: translateY(-1.5px) rotate(-0.3deg);
+    }
+
+    /* Match the heading's tilt to the Yes button's, but mirrored, so the
+       first question reads as ever-so-slightly askew in the other direction. */
+    .dialog.wireframe h2 {
+      transform: rotate(0.3deg);
+      transform-origin: center;
+    }
+
+    /* Thin wireframe guide lines, shown only on the first dialogue.
+       Just horizontal top/bottom hairlines on the heading and the button
+       row — no boxes, no outlines on the buttons or dialog frame. Uses
+       box-shadow so the lines don't affect layout or the button tuning. */
+    .dialog.wireframe h2,
+    .dialog.wireframe .dialog-buttons {
+      box-shadow:
+        0 -0.5px 0 0 rgba(255, 255, 255, 0.35),
+        0  0.5px 0 0 rgba(255, 255, 255, 0.35);
+    }
+
     /* ---------- Celebrate overlay ---------- */
     .celebrate {
       flex-direction: column;
@@ -845,13 +873,12 @@
 
     /* ---------- "Are you Lúcia?" dialog flow ---------- */
     (function () {
-      const SESSION_KEY = "quitDialogShown";
-      if (sessionStorage.getItem(SESSION_KEY)) return;
-
       const dialogOverlay = document.getElementById("dialog-overlay");
       const dialogQuestion = document.getElementById("dialog-question");
       const yesBtn = document.getElementById("dialog-yes");
       const noBtn = document.getElementById("dialog-no");
+      const dialogButtons = yesBtn.parentElement;
+      const dialogBox = dialogOverlay.querySelector(".dialog");
 
       const celebrateOverlay = document.getElementById("celebrate-overlay");
       const celebrateClose = document.getElementById("celebrate-close");
@@ -882,10 +909,6 @@
         }
       }
 
-      function markShown() {
-        try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) { /* ignore */ }
-      }
-
       // Question nodes
       const questions = {
         q1: {
@@ -895,13 +918,13 @@
         },
         q2: {
           text: "Have you quit yet?",
-          yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
-          no:  () => { hideOverlay(dialogOverlay); shia();      markShown(); },
+          yes: () => { hideOverlay(dialogOverlay); celebrate(); },
+          no:  () => { hideOverlay(dialogOverlay); shia();      },
         },
         q3: {
           text: "Can you ask her to quit?",
-          yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
-          no:  () => { hideOverlay(dialogOverlay); markShown(); },
+          yes: () => { hideOverlay(dialogOverlay); celebrate(); },
+          no:  () => { hideOverlay(dialogOverlay);              },
         },
       };
 
@@ -912,6 +935,8 @@
         if (!node) return;
         currentNode = node;
         dialogQuestion.textContent = node.text;
+        dialogButtons.classList.toggle("misaligned", key === "q1");
+        dialogBox.classList.toggle("wireframe", key === "q1");
         // Only open the overlay the first time; subsequent question changes
         // just swap text while it's already visible.
         if (!dialogOverlay.classList.contains("visible")) {
