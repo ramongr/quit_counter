@@ -134,6 +134,199 @@
     @media (prefers-reduced-motion: reduce) {
       .nyan, .trail { display: none; }
     }
+
+    /* ---------- Dialog / overlays ---------- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem 2.25rem;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      color: #fff;
+    }
+
+    .dialog h2 {
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .dialog-btn {
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.7rem 1.75rem;
+      min-width: 110px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dialog-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .dialog-btn.yes {
+      background: rgba(51, 204, 51, 0.25);
+      border-color: rgba(51, 204, 51, 0.55);
+    }
+
+    .dialog-btn.yes:hover {
+      background: rgba(51, 204, 51, 0.4);
+    }
+
+    .dialog-btn.no {
+      background: rgba(255, 60, 80, 0.22);
+      border-color: rgba(255, 60, 80, 0.5);
+    }
+
+    .dialog-btn.no:hover {
+      background: rgba(255, 60, 80, 0.38);
+    }
+
+    .dialog-btn:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+    /* ---------- Celebrate overlay ---------- */
+    .celebrate {
+      flex-direction: column;
+      gap: 1rem;
+      background: rgba(0, 0, 0, 0.75);
+    }
+
+    .fireworks-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .celebrate-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .celebrate-title {
+      font-size: clamp(3rem, 14vw, 9rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #ff0f0f, #ff9a00, #ffee00, #33cc33, #3399ff, #9933ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .celebrate-sub {
+      font-size: clamp(1.5rem, 6vw, 4rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+
+    .celebrate-hint {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---------- Shia GIF overlay ---------- */
+    .shia {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .shia-content {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shia-content img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* ---------- Close button ---------- */
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: background 0.2s ease, transform 0.12s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overlay { transition: none; }
+      .fireworks-canvas { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -207,6 +400,36 @@
       <rect x="6"  y="11" width="2" height="2" fill="#c0c0c0"/>
       <rect x="14" y="11" width="2" height="2" fill="#c0c0c0"/>
     </svg>
+  </div>
+
+  <!-- Question dialog -->
+  <div class="overlay" id="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-question" aria-hidden="true">
+    <div class="dialog">
+      <h2 id="dialog-question"></h2>
+      <div class="dialog-buttons">
+        <button type="button" class="dialog-btn yes" id="dialog-yes">Yes</button>
+        <button type="button" class="dialog-btn no" id="dialog-no">No</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Celebrate overlay -->
+  <div class="overlay celebrate" id="celebrate-overlay" aria-hidden="true">
+    <canvas class="fireworks-canvas" id="fireworks-canvas" aria-hidden="true"></canvas>
+    <button type="button" class="close-btn" id="celebrate-close" aria-label="Close">&times;</button>
+    <div class="celebrate-content">
+      <div class="celebrate-title">Fuck Yeah</div>
+      <div class="celebrate-sub">Way to Go</div>
+    </div>
+    <div class="celebrate-hint">(click anywhere to close)</div>
+  </div>
+
+  <!-- Shia GIF overlay -->
+  <div class="overlay shia" id="shia-overlay" aria-hidden="true">
+    <button type="button" class="close-btn" id="shia-close" aria-label="Close">&times;</button>
+    <div class="shia-content">
+      <img src="just_quit.gif" alt="Just do it" />
+    </div>
   </div>
 
   <script>
@@ -618,6 +841,242 @@
       }
 
       loop();
+    })();
+
+    /* ---------- "Are you Lúcia?" dialog flow ---------- */
+    (function () {
+      const SESSION_KEY = "quitDialogShown";
+      if (sessionStorage.getItem(SESSION_KEY)) return;
+
+      const dialogOverlay = document.getElementById("dialog-overlay");
+      const dialogQuestion = document.getElementById("dialog-question");
+      const yesBtn = document.getElementById("dialog-yes");
+      const noBtn = document.getElementById("dialog-no");
+
+      const celebrateOverlay = document.getElementById("celebrate-overlay");
+      const celebrateClose = document.getElementById("celebrate-close");
+      const fireworksCanvas = document.getElementById("fireworks-canvas");
+
+      const shiaOverlay = document.getElementById("shia-overlay");
+      const shiaClose = document.getElementById("shia-close");
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      let lastFocused = null;
+
+      function showOverlay(el, focusEl) {
+        lastFocused = document.activeElement;
+        el.classList.add("visible");
+        el.setAttribute("aria-hidden", "false");
+        if (focusEl) {
+          // Defer to allow transition/paint.
+          setTimeout(() => focusEl.focus(), 30);
+        }
+      }
+
+      function hideOverlay(el) {
+        el.classList.remove("visible");
+        el.setAttribute("aria-hidden", "true");
+        if (lastFocused && typeof lastFocused.focus === "function") {
+          try { lastFocused.focus(); } catch (e) { /* ignore */ }
+        }
+      }
+
+      function markShown() {
+        try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) { /* ignore */ }
+      }
+
+      // Question nodes
+      const questions = {
+        q1: {
+          text: "Are you L\u00facia?",
+          yes: () => showQuestion("q2"),
+          no:  () => showQuestion("q3"),
+        },
+        q2: {
+          text: "Have you quit yet?",
+          yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
+          no:  () => { hideOverlay(dialogOverlay); shia();      markShown(); },
+        },
+        q3: {
+          text: "Can you ask her to quit?",
+          yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
+          no:  () => { hideOverlay(dialogOverlay); markShown(); },
+        },
+      };
+
+      let currentNode = null;
+
+      function showQuestion(key) {
+        const node = questions[key];
+        if (!node) return;
+        currentNode = node;
+        dialogQuestion.textContent = node.text;
+        // Only open the overlay the first time; subsequent question changes
+        // just swap text while it's already visible.
+        if (!dialogOverlay.classList.contains("visible")) {
+          showOverlay(dialogOverlay, yesBtn);
+        } else {
+          setTimeout(() => yesBtn.focus(), 0);
+        }
+      }
+
+      yesBtn.addEventListener("click", () => currentNode && currentNode.yes());
+      noBtn.addEventListener("click",  () => currentNode && currentNode.no());
+
+      // Escape key: acts as "No" (safe default — cancel / decline).
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        if (dialogOverlay.classList.contains("visible")) {
+          currentNode && currentNode.no();
+        } else if (celebrateOverlay.classList.contains("visible")) {
+          closeCelebrate();
+        } else if (shiaOverlay.classList.contains("visible")) {
+          hideOverlay(shiaOverlay);
+        }
+      });
+
+      // ----- Shia branch -----
+      function shia() {
+        // Best-effort background tab: open in new tab then try to keep focus.
+        try {
+          const w = window.open("https://www.indeed.com", "_blank");
+          if (w) {
+            // Some browsers respect this and re-focus the opener; most do not.
+            try { window.focus(); } catch (e) { /* ignore */ }
+            try { w.blur(); } catch (e) { /* ignore */ }
+          }
+        } catch (e) { /* ignore */ }
+        showOverlay(shiaOverlay, shiaClose);
+      }
+
+      shiaClose.addEventListener("click", () => hideOverlay(shiaOverlay));
+      shiaOverlay.addEventListener("click", (e) => {
+        if (e.target === shiaOverlay) hideOverlay(shiaOverlay);
+      });
+
+      // ----- Celebrate branch (fireworks) -----
+      const FIREWORK_COLORS = ["#ff0f0f", "#ff9a00", "#ffee00", "#33cc33", "#3399ff", "#9933ff", "#ff3b8a"];
+      let fireworksRunning = false;
+      let fireworksRaf = 0;
+      let fireworksParticles = [];
+      let fireworksLastSpawn = 0;
+      let fireworksCtx = null;
+
+      function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        fireworksCanvas.width = window.innerWidth * dpr;
+        fireworksCanvas.height = window.innerHeight * dpr;
+        fireworksCanvas.style.width = window.innerWidth + "px";
+        fireworksCanvas.style.height = window.innerHeight + "px";
+        if (fireworksCtx) fireworksCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function spawnFirework() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const cx = vw * (0.15 + Math.random() * 0.7);
+        const cy = vh * (0.15 + Math.random() * 0.45);
+        const color = FIREWORK_COLORS[Math.floor(Math.random() * FIREWORK_COLORS.length)];
+        const count = 50 + Math.floor(Math.random() * 40);
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + Math.random() * 0.15;
+          const speed = 2 + Math.random() * 4;
+          fireworksParticles.push({
+            x: cx,
+            y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            color,
+            life: 0,
+            maxLife: 60 + Math.random() * 40,
+          });
+        }
+      }
+
+      function fireworksTick(now) {
+        if (!fireworksRunning) return;
+        const ctx = fireworksCtx;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Trail fade
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+        ctx.fillRect(0, 0, vw, vh);
+
+        if (now - fireworksLastSpawn > 550) {
+          spawnFirework();
+          fireworksLastSpawn = now;
+        }
+
+        ctx.globalCompositeOperation = "lighter";
+        for (let i = fireworksParticles.length - 1; i >= 0; i--) {
+          const p = fireworksParticles[i];
+          p.life += 1;
+          p.vy += 0.05; // gravity
+          p.vx *= 0.99;
+          p.vy *= 0.99;
+          p.x += p.vx;
+          p.y += p.vy;
+          const alpha = Math.max(0, 1 - p.life / p.maxLife);
+          if (alpha <= 0) {
+            fireworksParticles.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        fireworksRaf = requestAnimationFrame(fireworksTick);
+      }
+
+      function startFireworks() {
+        if (prefersReduced) return;
+        if (!fireworksCtx) fireworksCtx = fireworksCanvas.getContext("2d");
+        resizeCanvas();
+        fireworksParticles = [];
+        fireworksLastSpawn = 0;
+        fireworksRunning = true;
+        fireworksRaf = requestAnimationFrame(fireworksTick);
+      }
+
+      function stopFireworks() {
+        fireworksRunning = false;
+        if (fireworksRaf) cancelAnimationFrame(fireworksRaf);
+        fireworksRaf = 0;
+        fireworksParticles = [];
+        if (fireworksCtx) {
+          fireworksCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+      }
+
+      function celebrate() {
+        showOverlay(celebrateOverlay, celebrateClose);
+        startFireworks();
+      }
+
+      function closeCelebrate() {
+        stopFireworks();
+        hideOverlay(celebrateOverlay);
+      }
+
+      celebrateClose.addEventListener("click", (e) => {
+        e.stopPropagation();
+        closeCelebrate();
+      });
+      celebrateOverlay.addEventListener("click", () => closeCelebrate());
+
+      window.addEventListener("resize", () => {
+        if (fireworksRunning) resizeCanvas();
+      });
+
+      // Kick off the flow one second after load.
+      setTimeout(() => showQuestion("q1"), 1000);
     })();
   </script>
 </body>
