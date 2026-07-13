@@ -152,35 +152,21 @@
     <p class="since">Counting since October 11, 2024</p>
   </main>
 
-  <!-- Rainbow trail that traces the cat's actual flight path. -->
+  <!-- Rainbow trail that traces the cat's actual flight path.
+       The fade from tail (transparent) to head (opaque) is rendered as
+       many small sub-paths per color band, each with a fixed stroke-opacity.
+       This avoids an SVG <mask>+userSpaceOnUse-gradient combo that
+       intermittently fails to repaint on mobile WebKit. -->
   <svg class="trail" aria-hidden="true">
     <defs>
-      <linearGradient id="trail-fade" gradientUnits="userSpaceOnUse"
-                      x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0"    stop-color="black"/>
-        <stop offset="0.12" stop-color="black"/>
-        <stop offset="0.55" stop-color="white"/>
-        <stop offset="1"    stop-color="white"/>
-      </linearGradient>
-      <mask id="trail-fade-mask" maskUnits="userSpaceOnUse"
-            x="0" y="0" width="10000" height="10000">
-        <rect x="0" y="0" width="10000" height="10000" fill="url(#trail-fade)"/>
-      </mask>
       <path id="trail-center-path" d="M0 0" fill="none"/>
     </defs>
-    <g mask="url(#trail-fade-mask)">
-      <path class="band" stroke="#ff0f0f" d=""/>
-      <path class="band" stroke="#ff9a00" d=""/>
-      <path class="band" stroke="#ffee00" d=""/>
-      <path class="band" stroke="#33cc33" d=""/>
-      <path class="band" stroke="#3399ff" d=""/>
-      <path class="band" stroke="#9933ff" d=""/>
-      <text class="trail-text">
-        <textPath href="#trail-center-path" startOffset="100%" text-anchor="end">
-          JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT
-        </textPath>
-      </text>
-    </g>
+    <g class="trail-bands"></g>
+    <text class="trail-text">
+      <textPath href="#trail-center-path" startOffset="100%" text-anchor="end">
+        JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT&#160;&#160;·&#160;&#160;JUST QUIT
+      </textPath>
+    </text>
   </svg>
 
   <!-- Nyan Cat flying across the screen on random paths -->
@@ -290,9 +276,8 @@
       const trailSvg = document.querySelector(".trail");
       if (!nyan || !trailSvg) return;
 
-      const bandEls = trailSvg.querySelectorAll(".band");
+      const bandsGroup = trailSvg.querySelector(".trail-bands");
       const centerPathEl = trailSvg.querySelector("#trail-center-path");
-      const fadeGradient = trailSvg.querySelector("#trail-fade");
 
       const CAT_W = 120;
       const CAT_H = 70;
@@ -303,14 +288,47 @@
       const TRAIL_ANCHOR_X = 18;
       const TRAIL_ANCHOR_Y = 35;
 
-      const COLORS = 6;
+      const BAND_COLORS = ["#ff0f0f", "#ff9a00", "#ffee00", "#33cc33", "#3399ff", "#9933ff"];
+      const COLORS = BAND_COLORS.length;
       const BAND_H = 6;             // stroke width of each color band (px)
+      const FADE_SEG = 16;          // opacity buckets per band (fade resolution)
       const TRAIL_FRACTION = 0.4;   // trail length as a fraction of viewport width
-      const trailMax = () => window.innerWidth * TRAIL_FRACTION;
+      const TRAIL_MIN = 220;        // trail length floor so mobile still shows something
+      const trailMax = () => Math.max(TRAIL_MIN, window.innerWidth * TRAIL_FRACTION);
       const SAMPLE_MIN_DIST = 2;    // min px between recorded points
       const WAVE_AMP = 5;           // perpendicular wave amplitude (px)
       const WAVE_LEN = 60;          // wave wavelength along trail (px)
       const WAVE_SPEED = 6;         // wave phase speed (rad/s)
+
+      // Fade curve: `u` runs 0 at the tail to 1 at the head (cat).
+      // Match the old mask gradient: transparent 0..0.12, ramp to opaque by 0.55.
+      function fadeAlpha(u) {
+        const a = (u - 0.12) / (0.55 - 0.12);
+        return a < 0 ? 0 : a > 1 ? 1 : a;
+      }
+
+      // Build FADE_SEG sub-paths per color band. Each has a fixed
+      // stroke-opacity so the ribbon fades from tail (transparent) to head
+      // (opaque) without needing an SVG mask.
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      const bandPaths = []; // bandPaths[bandIdx] = [<path> × FADE_SEG]
+      const segAlpha = new Array(FADE_SEG);
+      for (let k = 0; k < FADE_SEG; k++) {
+        segAlpha[k] = fadeAlpha((k + 0.5) / FADE_SEG);
+      }
+      for (let b = 0; b < COLORS; b++) {
+        const list = [];
+        for (let k = 0; k < FADE_SEG; k++) {
+          const p = document.createElementNS(SVG_NS, "path");
+          p.setAttribute("class", "band");
+          p.setAttribute("stroke", BAND_COLORS[b]);
+          p.setAttribute("stroke-opacity", segAlpha[k].toFixed(3));
+          p.setAttribute("d", "");
+          bandsGroup.appendChild(p);
+          list.push(p);
+        }
+        bandPaths.push(list);
+      }
 
       const rand = (min, max) => min + Math.random() * (max - min);
       const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -385,7 +403,11 @@
 
       function resetTrail() {
         trailPoints = [];
-        for (const p of bandEls) p.setAttribute("d", "");
+        for (let b = 0; b < COLORS; b++) {
+          for (let k = 0; k < FADE_SEG; k++) {
+            bandPaths[b][k].setAttribute("d", "");
+          }
+        }
         centerPathEl.setAttribute("d", "M0 0");
       }
 
@@ -430,7 +452,11 @@
       function renderTrail(nowMs) {
         const n = trailPoints.length;
         if (n < 2) {
-          for (const p of bandEls) p.setAttribute("d", "");
+          for (let b = 0; b < COLORS; b++) {
+            for (let k = 0; k < FADE_SEG; k++) {
+              bandPaths[b][k].setAttribute("d", "");
+            }
+          }
           centerPathEl.setAttribute("d", "M0 0");
           return;
         }
@@ -443,6 +469,7 @@
           const b = trailPoints[i + 1];
           arc[i] = arc[i + 1] + Math.hypot(b.x - a.x, b.y - a.y);
         }
+        const L = arc[0] || 1;
 
         // Unit normal at each point (perpendicular to local tangent).
         const nx = new Array(n);
@@ -468,35 +495,56 @@
           wave[i] = WAVE_AMP * Math.sin(k * arc[i] - wt);
         }
 
-        // Build one polyline per color band, offset perpendicularly.
-        for (let b = 0; b < COLORS; b++) {
-          const bandOffset = (b - (COLORS - 1) / 2) * BAND_H;
-          let d = "";
-          for (let i = 0; i < n; i++) {
-            const off = bandOffset + wave[i];
-            const x = trailPoints[i].x + nx[i] * off;
-            const y = trailPoints[i].y + ny[i] * off;
-            d += (i === 0 ? "M" : "L") + x.toFixed(1) + " " + y.toFixed(1);
-            if (i < n - 1) d += " ";
-          }
-          bandEls[b].setAttribute("d", d);
+        // Bucket each segment (i → i+1) into a FADE_SEG index by its midpoint's
+        // position along the trail. `u = 1 - arc/L` runs 0 at tail to 1 at head.
+        const segBucket = new Array(n - 1);
+        for (let i = 0; i < n - 1; i++) {
+          const uMid = 1 - (arc[i] + arc[i + 1]) * 0.5 / L;
+          let bucket = Math.floor(uMid * FADE_SEG);
+          if (bucket < 0) bucket = 0;
+          else if (bucket >= FADE_SEG) bucket = FADE_SEG - 1;
+          segBucket[i] = bucket;
         }
 
-        // Center-line path drives the textPath and the fade gradient.
+        // Build one polyline per (band, opacity bucket).
+        const bandDs = new Array(FADE_SEG);
+        const bandPrev = new Array(FADE_SEG);
+        for (let b = 0; b < COLORS; b++) {
+          const bandOffset = (b - (COLORS - 1) / 2) * BAND_H;
+          for (let k2 = 0; k2 < FADE_SEG; k2++) {
+            bandDs[k2] = "";
+            bandPrev[k2] = -2;
+          }
+          for (let i = 0; i < n - 1; i++) {
+            const bucket = segBucket[i];
+            const off_i  = bandOffset + wave[i];
+            const off_i1 = bandOffset + wave[i + 1];
+            const x_i  = trailPoints[i].x     + nx[i]     * off_i;
+            const y_i  = trailPoints[i].y     + ny[i]     * off_i;
+            const x_i1 = trailPoints[i + 1].x + nx[i + 1] * off_i1;
+            const y_i1 = trailPoints[i + 1].y + ny[i + 1] * off_i1;
+
+            if (bandPrev[bucket] === i - 1) {
+              bandDs[bucket] += "L" + x_i1.toFixed(1) + " " + y_i1.toFixed(1) + " ";
+            } else {
+              bandDs[bucket] +=
+                "M" + x_i.toFixed(1)  + " " + y_i.toFixed(1)  + " " +
+                "L" + x_i1.toFixed(1) + " " + y_i1.toFixed(1) + " ";
+            }
+            bandPrev[bucket] = i;
+          }
+          for (let k2 = 0; k2 < FADE_SEG; k2++) {
+            bandPaths[b][k2].setAttribute("d", bandDs[k2]);
+          }
+        }
+
+        // Center-line path drives the textPath.
         let td = "";
         for (let i = 0; i < n; i++) {
           td += (i === 0 ? "M" : "L") + trailPoints[i].x.toFixed(1) + " " + trailPoints[i].y.toFixed(1);
           if (i < n - 1) td += " ";
         }
         centerPathEl.setAttribute("d", td);
-
-        // Point the fade gradient from tail (transparent) → head (opaque).
-        const tail = trailPoints[0];
-        const head = trailPoints[n - 1];
-        fadeGradient.setAttribute("x1", tail.x.toFixed(1));
-        fadeGradient.setAttribute("y1", tail.y.toFixed(1));
-        fadeGradient.setAttribute("x2", head.x.toFixed(1));
-        fadeGradient.setAttribute("y2", head.y.toFixed(1));
       }
 
       function runPath(path) {
