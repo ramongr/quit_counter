@@ -410,13 +410,12 @@ setInterval(update, 1000);
 
 /* ---------- "Are you Lúcia?" dialog flow ---------- */
 (function () {
-  const SESSION_KEY = "quitDialogShown";
-  if (sessionStorage.getItem(SESSION_KEY)) return;
-
   const dialogOverlay = document.getElementById("dialog-overlay");
   const dialogQuestion = document.getElementById("dialog-question");
   const yesBtn = document.getElementById("dialog-yes");
   const noBtn = document.getElementById("dialog-no");
+  const dialogButtons = yesBtn.parentElement;
+  const dialogBox = dialogOverlay.querySelector(".dialog");
 
   const celebrateOverlay = document.getElementById("celebrate-overlay");
   const celebrateClose = document.getElementById("celebrate-close");
@@ -447,10 +446,6 @@ setInterval(update, 1000);
     }
   }
 
-  function markShown() {
-    try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* ignore */ }
-  }
-
   // Question nodes
   const questions = {
     q1: {
@@ -460,13 +455,13 @@ setInterval(update, 1000);
     },
     q2: {
       text: "Have you quit yet?",
-      yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
-      no:  () => { hideOverlay(dialogOverlay); shia();      markShown(); },
+      yes: () => { hideOverlay(dialogOverlay); celebrate(); },
+      no:  () => { hideOverlay(dialogOverlay); shia();      },
     },
     q3: {
       text: "Can you ask her to quit?",
-      yes: () => { hideOverlay(dialogOverlay); celebrate(); markShown(); },
-      no:  () => { hideOverlay(dialogOverlay); markShown(); },
+      yes: () => { hideOverlay(dialogOverlay); celebrate(); },
+      no:  () => { hideOverlay(dialogOverlay);              },
     },
   };
 
@@ -477,6 +472,8 @@ setInterval(update, 1000);
     if (!node) return;
     currentNode = node;
     dialogQuestion.textContent = node.text;
+    dialogButtons.classList.toggle("misaligned", key === "q1");
+    dialogBox.classList.toggle("wireframe", key === "q1");
     // Only open the overlay the first time; subsequent question changes
     // just swap text while it's already visible.
     if (!dialogOverlay.classList.contains("visible")) {
