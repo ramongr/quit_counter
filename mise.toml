@@ -1,1 +1,3 @@
-opencode="latest"
+[tools]
+opencode = "latest"
+node = "latest"
